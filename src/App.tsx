@@ -7,28 +7,38 @@ interface User {
   email: string;
 }
 
-const App: React.FC = () => {
+const UserList: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
-
+  const [error, setError] = useState<string | null>(null);
   useEffect(() => {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then(response => response.json())
+    fetch(import.meta.env.VITE_YOUR_API_USERS)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
       .then(data => setUsers(data))
-      .catch(error => console.error('Error fetching users:', error));
+      .catch(error => {
+        console.error('Error fetching users:', error);
+        setError('Error fetching users');
+      });
   }, []);
 
   return (
     <div>
       <h1>Lista de Usuarios</h1>
-      <ul>
-        {users.map(user => (
-          <li key={user.id}>
-            {user.name} ({user.username}) - {user.email}
-          </li>
-        ))}
-      </ul>
+      {error ? <p>{error}</p> : (
+        <ul>
+          {users.map(user => (
+            <li key={user.id}>
+              {user.name} ({user.username}) - {user.email}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
 
-export default App;
+export default UserList;
